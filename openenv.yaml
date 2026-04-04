@@ -1,0 +1,72 @@
+name: pharmatrials-env
+version: 1.0.0
+description: >
+  A clinical-trial document intelligence environment for AI agents.
+  Agents review, extract, and reconcile regulatory documents (ICFs,
+  protocols, SAPs, AE narratives) under partial-progress reward signals.
+author: PharmaTrials-Env Contributors
+license: Apache-2.0
+tags:
+  - openenv
+  - document-intelligence
+  - clinical-trials
+  - regulatory
+  - information-extraction
+  - multi-document-reasoning
+
+tasks:
+  - id: EASY
+    name: ICF Extraction
+    description: Extract 12 structured fields from a single ICF document.
+    difficulty: easy
+    max_steps: 15
+    reward_range: [0.0, 1.0]
+    expected_score_gpt4o: 0.78
+
+  - id: MEDIUM
+    name: Protocol-ICF Consistency Check
+    description: Identify and classify 5-8 deliberate inconsistencies between a Study Protocol and an ICF.
+    difficulty: medium
+    max_steps: 25
+    reward_range: [0.0, 1.0]
+    expected_score_gpt4o: 0.54
+
+  - id: HARD
+    name: SAP-AE Narrative Reconciliation
+    description: Reconcile AE narratives against SAP specifications, identifying coding errors and undetected SAEs.
+    difficulty: hard
+    max_steps: 40
+    reward_range: [0.0, 1.0]
+    expected_score_gpt4o: 0.30
+
+observation_space:
+  type: dict
+  fields:
+    task_id: string
+    step_number: integer
+    documents: dict[string, DocumentView]
+    last_action_result: ActionResult | null
+    partial_score: float
+
+action_space:
+  type: discriminated_union
+  variants: [EXTRACT, COMPARE, SUMMARISE, ANNOTATE, QUERY, SUBMIT]
+
+reward_space:
+  type: float
+  range: [0.0, 1.0]
+  components: [accuracy, completeness, regulatory_alignment, efficiency]
+
+api:
+  python_class: pharmatrials_env.PharmaTrialsEnv
+  http_base_url: http://localhost:8080
+  endpoints:
+    reset: POST /reset
+    step: POST /step
+    state: GET /state
+
+docker:
+  image: pharmatrials-env:latest
+  port: 7860
+  build_command: docker build -t pharmatrials-env .
+  run_command: docker run -p 8080:7860 pharmatrials-env

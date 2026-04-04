@@ -1,0 +1,13 @@
+{
+  "task": "MEDIUM",
+  "seed": 137,
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "api_base_url": "https://router.huggingface.co/v1",
+  "steps": 2,
+  "score": 0.07168,
+  "success": true,
+  "rewards": [
+    0.034,
+    0.07168
+  ]
+}

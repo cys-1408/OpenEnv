@@ -1,0 +1,40 @@
+Statistical Analysis Plan
+Protocol Number: {{ protocol_number }}
+Primary Analysis Method: {{ primary_analysis_method }}
+Covariates: {{ covariate_list | join(', ') }}
+Multiplicity Adjustment Method: {{ multiplicity_adjustment_method }}
+Sensitivity Analyses: {{ sensitivity_analysis_descriptions | join('; ') }}
+Missing Data Strategy: {{ missing_data_strategy }}
+
+Analysis Populations
+Analysis Population: {{ analysis_population }}
+The primary estimand framework and handling strategies are prespecified to reduce analytical bias
+and support transparent interpretation of treatment effects under protocol-defined assumptions.
+
+Adverse Event Analysis
+MedDRA Coding Level: {{ meddra_coding_level }}
+CTCAE Version: {{ ctcae_version }}
+SAE Definition: {{ sae_definition }}
+Endpoint List: {{ sap_endpoint_list | join(', ') }}
+
+Intercurrent Events
+Intercurrent events will be classified according to pre-defined categories and treated according
+to the estimand strategy selected for each endpoint family.
+
+Modeling and Inference
+{% for i in range(1, 16) %}
+Methodology Block {{ i }}
+Primary and supportive models include fixed treatment effects, visit terms, and stratification
+factors where relevant. Sensitivity analyses evaluate robustness under alternative assumptions,
+including missing data departures, protocol deviations, and endpoint definition perturbations.
+Output tables, listings, and figures are generated under quality-controlled programming standards.
+{% endfor %}
+
+Programming and Validation
+Independent review of derivation logic, traceable metadata, and reproducible execution records
+will be maintained to satisfy sponsor and regulatory quality expectations.
+
+Long Form SAP Narrative
+{% for paragraph in sap_long_sections %}
+{{ paragraph }}
+{% endfor %}

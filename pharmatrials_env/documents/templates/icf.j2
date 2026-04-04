@@ -1,0 +1,92 @@
+Study Title & Sponsor
+Title: {{ study_title }}
+Sponsor: {{ sponsor_name }}
+Protocol Number: {{ protocol_number }}
+Phase: {{ phase }}
+
+Purpose of the Study
+Primary Indication: {{ primary_indication }}
+Study Rationale: {{ study_rationale }}
+Primary Endpoint: {{ primary_endpoint }}
+Mechanism of Action Summary: {{ mechanism_of_action_summary }}
+
+Study Procedures
+Visit Schedule: {{ visit_schedule | join(', ') }}
+Total Duration (weeks): {{ total_duration_weeks }}
+Number of Visits: {{ num_visits }}
+{% for visit_name, procedures in procedures_per_visit.items() %}
+{{ visit_name }} Procedures: {{ procedures | join(', ') }}
+{% endfor %}
+
+Investigational Product
+Compound Name: {{ compound_name }}
+Dose (mg): {{ dose_mg }}
+Route of Administration: {{ route_of_administration }}
+Dosing Frequency: {{ dosing_frequency }}
+
+Potential Risks
+Risk List: {{ risk_list | join(', ') }}
+Serious Risks: {{ serious_risk_list | join(', ') }}
+Risk Probability Qualifiers: {{ risk_probability_qualifiers | join(', ') }}
+
+Potential Benefits
+You may or may not receive direct medical benefit from participation in this research study.
+The study is designed to evaluate treatment effects in a controlled setting and no guarantee
+of clinical improvement can be made. Your participation contributes to scientific understanding
+that may benefit future patients with similar conditions.
+
+Alternatives
+Alternative treatment options are available outside this trial and can include standard-of-care
+therapies, supportive care, or no treatment. You should discuss alternatives with your physician
+before deciding whether to enroll.
+
+Confidentiality
+Data Sharing Entities: {{ data_sharing_entities | join(', ') }}
+HIPAA Reference: {{ hipaa_reference }}
+GDPR Reference: {{ gdpr_reference }}
+
+Voluntary Participation
+Withdrawal Rights: {{ withdrawal_rights_statement }}
+No Penalty Clause: {{ no_penalty_clause }}
+
+Contact Information
+PI Name: {{ pi_name }}
+PI Phone: {{ pi_phone }}
+Emergency Contact: {{ emergency_contact }}
+IRB Name: {{ irb_name }}
+IRB Phone: {{ irb_phone }}
+
+Compensation
+Compensation Amount (USD): {{ compensation_amount_usd }}
+Injury Compensation Policy: {{ injury_compensation_policy }}
+
+Detailed Participation Narrative
+{% for visit in visit_schedule %}
+Visit Description {{ loop.index }}
+At {{ visit }}, you may undergo protocol-defined assessments including symptom review,
+vital signs, laboratory panels, and investigational product accountability. Study staff
+will evaluate treatment adherence and document adverse events using standardized clinical
+terminology and grading conventions. If medically indicated, additional procedures can be
+performed to protect participant safety and ensure protocol compliance.
+{% endfor %}
+
+Regulatory and Safety Statement
+This study is conducted according to ICH E6(R3) Good Clinical Practice principles and all
+applicable national regulations. Adverse events are reviewed by qualified investigators and
+reported in accordance with sponsor safety procedures. Data quality checks, source verification,
+and monitoring visits may be performed by authorized personnel. Participation remains voluntary
+throughout the trial duration.
+
+Participant Acknowledgment
+By signing this consent form, you acknowledge that you have read or had read to you all sections,
+that your questions have been answered, and that you understand the study procedures and risks.
+You agree to comply with required trial visits and to promptly report changes in your medical status.
+
+Signatures
+Number of Signature Lines: {{ num_signature_lines }}
+Witness Required: {{ witness_required }}
+
+Long Form Regulatory Narrative
+{% for paragraph in icf_long_sections %}
+{{ paragraph }}
+{% endfor %}

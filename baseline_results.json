@@ -1,0 +1,125 @@
+{
+  "status": "completed",
+  "model": "gpt-4o",
+  "api_base_url": null,
+  "tasks": [
+    "EASY",
+    "MEDIUM",
+    "HARD"
+  ],
+  "seeds": [
+    42,
+    137,
+    999
+  ],
+  "results": {
+    "EASY": {
+      "mean": 0.23511111111111113,
+      "min": 0.2351111111111111,
+      "max": 0.2351111111111111,
+      "per_seed": {
+        "42": 0.2351111111111111,
+        "137": 0.2351111111111111,
+        "999": 0.2351111111111111
+      },
+      "steps_per_seed": {
+        "42": 5,
+        "137": 5,
+        "999": 5
+      },
+      "modes_per_seed": {
+        "42": "fallback",
+        "137": "fallback",
+        "999": "fallback"
+      }
+    },
+    "MEDIUM": {
+      "mean": 0.06434666666666668,
+      "min": 0.05868,
+      "max": 0.07168,
+      "per_seed": {
+        "42": 0.06268000000000001,
+        "137": 0.07168,
+        "999": 0.05868
+      },
+      "steps_per_seed": {
+        "42": 2,
+        "137": 2,
+        "999": 2
+      },
+      "modes_per_seed": {
+        "42": "fallback",
+        "137": "fallback",
+        "999": "fallback"
+      }
+    },
+    "HARD": {
+      "mean": 0.016874999999999998,
+      "min": 0.016874999999999998,
+      "max": 0.016874999999999998,
+      "per_seed": {
+        "42": 0.016874999999999998,
+        "137": 0.016874999999999998,
+        "999": 0.016874999999999998
+      },
+      "steps_per_seed": {
+        "42": 2,
+        "137": 2,
+        "999": 2
+      },
+      "modes_per_seed": {
+        "42": "fallback",
+        "137": "fallback",
+        "999": "fallback"
+      }
+    }
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "task_id": "EASY",
+      "seed": 42,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "EASY",
+      "seed": 137,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "EASY",
+      "seed": 999,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "MEDIUM",
+      "seed": 42,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "MEDIUM",
+      "seed": 137,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "MEDIUM",
+      "seed": 999,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "HARD",
+      "seed": 42,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "HARD",
+      "seed": 137,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    },
+    {
+      "task_id": "HARD",
+      "seed": 999,
+      "warning": "provider_fallback: AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: 87660644**********************************TffA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+    }
+  ]
+}

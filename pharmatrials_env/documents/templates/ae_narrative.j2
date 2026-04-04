@@ -1,0 +1,21 @@
+Adverse Event Narrative
+Narrative ID: {{ narrative_id }}
+Patient ID: {{ patient_id }}
+AE Term: {{ ae_term }}
+Onset Date: {{ onset_date }}
+Resolution Date: {{ resolution_date }}
+Severity Grade (CTCAE): {{ severity_grade }}
+Causality Assessment: {{ causality_assessment }}
+Action Taken: {{ action_taken }}
+Outcome: {{ outcome }}
+SAE Flag: {{ sae_flag }}
+
+Narrative Summary
+This narrative documents the chronological clinical course for the reported adverse event,
+including onset context, treatment actions, and resolution status under protocol-defined
+safety monitoring procedures.
+
+Clinical Course Details
+{% for paragraph in narrative_long_sections %}
+{{ paragraph }}
+{% endfor %}

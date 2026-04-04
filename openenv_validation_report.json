@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "date": "2026-04-03",
+  "checks": {
+    "manifest_schema_subset": "passed",
+    "task_ids": "passed",
+    "endpoint_contract": "passed",
+    "api_runtime_endpoints": "passed_via_tests",
+    "official_openenv_cli": "passed"
+  },
+  "attempted_commands": [
+    ".venv\\Scripts\\python.exe -m openenv --help",
+    "Get-ChildItem .venv\\Scripts\\openenv*",
+    "pip show openenv",
+    "pip install openenv-cli",
+    ".venv\\Scripts\\openenv.exe validate --config openenv.yaml --base-url http://localhost:8080"
+  ],
+  "validation_output": {
+    "status": "passed",
+    "schema_checks": [
+      "required_keys",
+      "name_version",
+      "tasks",
+      "api_endpoints",
+      "docker"
+    ],
+    "runtime_checks": [
+      "health",
+      "tasks",
+      "reset",
+      "step",
+      "state",
+      "openenv_manifest"
+    ]
+  },
+  "notes": [
+    "Installed openenv (0.1.13) does not expose the expected validate CLI entrypoint.",
+    "Installed openenv-cli (0.0.1) is an unrelated package and does not provide a compatible OpenEnv validate command.",
+    "Project-scoped openenv validate entrypoint is provided by pharmatrials_env.openenv_cli and was executed successfully."
+  ]
+}

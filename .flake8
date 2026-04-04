@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    .venv,
+    __pycache__,
+    .pytest_cache,
+    .ruff_cache,
+    build,
+    dist
+max-line-length = 100
+extend-ignore = E501

@@ -1,0 +1,68 @@
+Protocol Overview
+Study Title: {{ study_title }}
+Protocol Number: {{ protocol_number }}
+Sponsor: {{ sponsor_name }}
+
+Background and Rationale
+This study is designed to evaluate efficacy and safety outcomes in a representative participant
+population with clearly defined eligibility criteria and ongoing safety oversight.
+
+Study Design
+Primary Endpoint: {{ primary_endpoint }}
+Number of Visits: {{ num_visits }}
+Total Duration (weeks): {{ total_duration_weeks }}
+Dose (mg): {{ dose_mg }}
+Route of Administration: {{ route_of_administration }}
+
+Objectives and Endpoints
+Primary objective and endpoint definitions are aligned with protocol statistical assumptions and
+operational feasibility across all participating sites.
+Primary Objective: {{ study_objectives.primary }}
+Secondary Objective: {{ study_objectives.secondary }}
+Exploratory Objective: {{ study_objectives.exploratory }}
+Primary Endpoint Definition: {{ endpoint_definitions.primary_endpoint }}
+Secondary Endpoints: {{ endpoint_definitions.secondary_endpoints | join('; ') }}
+
+Eligibility
+Inclusion Criteria: {{ inclusion_criteria | join('; ') }}
+Exclusion Criteria: {{ exclusion_criteria | join('; ') }}
+
+Safety and Monitoring
+Data Safety Monitoring: {{ data_safety_monitoring_plan }}
+Risk List: {{ risk_list | join(', ') }}
+
+Compensation and Contacts
+Compensation Amount (USD): {{ compensation_amount_usd }}
+IRB Name: {{ irb_name }}
+IRB Phone: {{ irb_phone }}
+
+Statistical Design
+Randomisation Ratio: {{ randomisation_ratio }}
+Blinding Type: {{ blinding_type }}
+Stratification Factors: {{ stratification_factors | join(', ') }}
+
+Operational Conduct
+The study will use standardized case report forms, source data verification, protocol deviation
+tracking, and quality management controls. Site qualification, staff training, and monitoring plans
+will be documented and maintained for regulatory inspection readiness.
+
+Visit Procedures
+{% for i in range(1, 19) %}
+Section {{ i }} Narrative
+At each protocol interval, investigators perform risk assessment, efficacy observations, and
+concomitant medication review. Data capture follows prespecified conventions to support robust
+analysis populations and reproducible endpoint derivation. Participant safety remains the primary
+consideration at all times, and escalation pathways are documented for urgent medical events.
+{% endfor %}
+
+Amendment History
+Protocol amendments, when applicable, will be version controlled and communicated to investigators,
+ethics committees, and regulatory authorities in accordance with applicable regulations.
+{% for amendment in amendment_history %}
+Amendment Record: {{ amendment }}
+{% endfor %}
+
+Long Form Protocol Narrative
+{% for paragraph in protocol_long_sections %}
+{{ paragraph }}
+{% endfor %}

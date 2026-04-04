@@ -1,0 +1,2 @@
+[console_scripts]
+openenv = pharmatrials_env.openenv_cli:main

@@ -1,0 +1,347 @@
+Metadata-Version: 2.4
+Name: pharmatrials-env
+Version: 1.0.0
+Summary: OpenEnv: Clinical-Trial Document Intelligence Environment
+Author: PharmaTrials-Env Contributors
+License: Apache-2.0
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic<3.0,>=2.5
+Requires-Dist: fastapi<1.0,>=0.110
+Requires-Dist: uvicorn[standard]<1.0,>=0.29
+Requires-Dist: jinja2<4.0,>=3.1
+Requires-Dist: openai<2.0,>=1.30
+Requires-Dist: pyyaml<7.0,>=6.0
+Requires-Dist: faker<25.0,>=24.0
+Requires-Dist: numpy<3.0,>=1.26
+Requires-Dist: rapidfuzz<4.0,>=3.6
+Requires-Dist: httpx<1.0,>=0.27
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Requires-Dist: ruff>=0.4; extra == "dev"
+Requires-Dist: mypy>=1.10; extra == "dev"
+
+---
+title: PharmaTrials-Env
+emoji: "🧪"
+colorFrom: blue
+colorTo: teal
+sdk: docker
+app_port: 7860
+tags:
+  - openenv
+  - clinical-trials
+  - document-intelligence
+  - rl-environment
+  - ai-agent
+pinned: true
+license: apache-2.0
+---
+
+## PharmaTrials-Env
+
+A clinical-trial document intelligence environment for AI agents.
+
+PharmaTrials-Env is an OpenEnv-compliant environment for Clinical-Trial Document Intelligence (CTDI), designed to train and evaluate agents on extraction, consistency checking, and reconciliation workflows over synthetic regulatory documents.
+
+## Environment Overview
+
+This environment focuses on realistic, high-stakes documentation flows common in clinical research operations:
+
+- Long-form document understanding (ICF, Protocol, SAP)
+- Cross-document inconsistency detection
+- Safety narrative reconciliation with regulatory framing
+- Dense trajectory-aware reward signals
+
+All data is synthetic and procedurally generated with deterministic seed control.
+
+## Why This Environment
+
+Clinical trial operations require detailed consistency checks and structured extraction across long-form regulated documents. This environment focuses on:
+
+- Structured extraction from ICFs
+- Protocol and ICF cross-document consistency analysis
+- SAP to AE narrative reconciliation
+- Dense partial-progress rewards for process learning
+
+## Setup and Installation
+
+Prerequisites:
+
+- Python 3.11+
+- pip
+
+Install:
+
+```bash
+pip install -e .
+pip install -e .[dev]
+```
+
+Optional environment variable for baseline script:
+
+```bash
+set OPENAI_API_KEY=your-key
+```
+
+## Quick Start (Python)
+
+```python
+from pharmatrials_env import PharmaTrialsEnv
+from pharmatrials_env.models import Action
+
+env = PharmaTrialsEnv()
+obs = env.reset(task_id="EASY", seed=42)
+
+action = Action.model_validate({
+    "action_type": "EXTRACT",
+    "payload": {
+        "doc_id": "icf_001",
+        "fields": ["study_title", "protocol_number"],
+        "section_hint": "Study Title"
+    }
+})
+
+obs, reward, done, info = env.step(action)
+print(reward.total, done)
+```
+
+## Observation Space
+
+Core fields returned by reset and step:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| task_id | string | EASY, MEDIUM, HARD |
+| task_name | enum string | ICF_EXTRACTION, PROTOCOL_ICF_CONSISTENCY, SAP_AE_RECONCILIATION |
+| step_number | int | Current step index |
+| max_steps | int | Task max step budget |
+| documents | dict | Document views keyed by doc_id |
+| last_action_result | object/null | Outcome of previous action |
+| task_instruction | string | Natural-language task brief |
+| partial_score | float | Running normalized episode score |
+| done | bool | Episode terminal flag |
+| metadata | dict | Episode/task metadata |
+
+## Quick Start (Docker)
+
+```bash
+docker build -t pharmatrials-env:latest .
+docker run -p 8080:7860 pharmatrials-env:latest
+curl http://localhost:8080/health
+```
+
+## Quick Start (HTTP)
+
+```bash
+curl -X POST http://localhost:8080/reset \
+  -H "Content-Type: application/json" \
+  -d '{"task_id":"EASY","seed":42}'
+
+curl -X POST http://localhost:8080/step \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action_type": "QUERY",
+    "payload": {"doc_id":"icf_001","question":"What is the protocol number?"}
+  }'
+```
+
+## Action Space
+
+Supported actions:
+
+- EXTRACT: structured field extraction from a document
+- COMPARE: compare fields across two documents
+- SUMMARISE: targeted summary of a document
+- ANNOTATE: append labeled annotation metadata
+- QUERY: factual lookup from document content
+- SUBMIT: final answer payload for grading
+
+Action payload examples are listed in the Appendix section of the project specification.
+
+## Tasks
+
+- EASY: ICF Extraction (12 required fields)
+- MEDIUM: Protocol-ICF consistency check (5-8 injected inconsistencies)
+- HARD: SAP-AE narrative reconciliation (8-15 narratives)
+
+### EASY (ICF Extraction)
+
+- Inputs: one ICF document
+- Goal: extract 12 required fields
+- Max steps: 15
+
+### MEDIUM (Protocol-ICF Consistency)
+
+- Inputs: one Protocol and one ICF
+- Goal: identify and classify inconsistencies with regulatory basis
+- Max steps: 25
+
+### HARD (SAP-AE Reconciliation)
+
+- Inputs: SAP, Protocol, and 8-15 AE narratives
+- Goal: produce SAP summary, per-narrative extraction, and reconciliation findings
+- Max steps: 40
+
+## Reward Function
+
+Per-step reward:
+
+\[
+R_{total}(t) = w_{acc}R_{acc}(t) + w_{cmp}R_{cmp}(t) + w_{reg}R_{reg}(t) + w_{eff}R_{eff}(t) - penalty(t)
+\]
+
+Episode score normalization:
+
+\[
+score = \frac{\sum_{t=1}^{T} R_{total}(t)}{max\_steps}
+\]
+
+Default component weights:
+
+- Accuracy: 0.40
+- Completeness: 0.30
+- Regulatory alignment: 0.20
+- Efficiency: 0.10
+
+Penalties:
+
+- Invalid action: -0.05 each
+- Repeated action on same action_type + doc_id within 3 steps: -0.03
+- Unused query result at submit: -0.02 per occurrence
+- Three consecutive invalid actions: early termination
+
+## API
+
+- `POST /reset` -> initial observation
+- `POST /step` -> transition tuple (`observation`, `reward`, `done`, `info`)
+- `GET /state` -> full environment state
+- `GET /health` -> service health
+- `GET /tasks` -> task summaries
+- `GET /openenv.yaml` -> OpenEnv manifest
+
+### Endpoint Schemas
+
+- `POST /reset` request: `{ "task_id": "EASY|MEDIUM|HARD", "seed": 42 }`
+- `POST /step` request: valid `Action` object
+- `POST /step` response: `{ observation, reward, done, info }`
+- `GET /state` response: full `EnvState` snapshot
+
+## Baseline
+
+Set your OpenAI key and run:
+
+```bash
+set OPENAI_API_KEY=your-key
+python baseline/run_baseline.py
+```
+
+Expected mean ranges:
+
+- EASY: 0.72-0.85
+- MEDIUM: 0.45-0.62
+- HARD: 0.22-0.38
+
+Baseline output is written to `baseline_results.json`.
+
+## Running the Baseline
+
+```bash
+python baseline/run_baseline.py
+```
+
+The script runs three seeds across EASY, MEDIUM, HARD and prints plus saves aggregate results.
+
+## Installation
+
+```bash
+pip install -e .
+pip install -e .[dev]
+```
+
+## Running Tests
+
+```bash
+pytest tests/ -v --tb=short
+pytest tests/ --cov=pharmatrials_env --cov-report=term-missing
+pytest tests/test_graders.py -v
+```
+
+## OpenEnv Validation
+
+```bash
+uvicorn pharmatrials_env.api.server:app --host 0.0.0.0 --port 8080
+openenv validate --config openenv.yaml --base-url http://localhost:8080
+```
+
+## Environment Architecture
+
+Subsystems:
+
+- Document engine: deterministic synthetic corpus generation via Jinja2 and seeded RNG
+- Task registry: declarative task specifications and policies
+- State manager: typed mutable environment state
+- Action dispatcher: typed action handlers for six action types
+- Grader engine: deterministic scoring for each task
+- API layer: FastAPI wrapper for HTTP-based interaction
+
+## Document Generation
+
+Documents are generated from templates and seeded vocabularies with deterministic randomization:
+
+- ICF
+- Protocol
+- SAP
+- AE narratives
+
+Generated artifacts include hidden ground truth for deterministic grading.
+
+## FAQ and Troubleshooting
+
+Q: `ValueError Unknown task_id` on reset.
+
+- Ensure task_id is one of `EASY`, `MEDIUM`, `HARD`.
+
+Q: FastAPI server starts but requests fail.
+
+- Verify host/port mapping and that you are calling `http://localhost:8080` when running `-p 8080:7860`.
+
+Q: Baseline script fails with authentication error.
+
+- Set `OPENAI_API_KEY` in your environment before running.
+
+Q: Determinism appears inconsistent.
+
+- Reuse the same seed and task_id combination; outputs should be stable.
+
+## Citation
+
+```bibtex
+@software{pharmatrials_env_2026,
+  title = {PharmaTrials-Env: A Clinical-Trial Document Intelligence Environment for AI Agents},
+  author = {PharmaTrials-Env Contributors},
+  year = {2026},
+  version = {1.0.0},
+  license = {Apache-2.0}
+}
+```
+
+## Repository Layout
+
+```text
+pharmatrials-env/
+├── pharmatrials_env/
+├── baseline/
+├── tests/
+├── openenv.yaml
+├── Dockerfile
+├── requirements.txt
+├── pyproject.toml
+└── README.md
+```
+
+## License
+
+Apache-2.0. See the project metadata in `pyproject.toml` and `openenv.yaml`.

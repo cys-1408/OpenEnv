@@ -1,0 +1,15 @@
+[MASTER]
+ignore=.venv
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    duplicate-code,
+    cyclic-import,
+    import-outside-toplevel,
+    too-many-instance-attributes
+
+[FORMAT]
+max-line-length=100
