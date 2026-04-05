@@ -100,7 +100,9 @@ class ConsistencyGrader(AbstractGrader):
         return self._apply_schema_adjustment(points, pred, truth)
 
     def _is_field_match(self, pred: dict[str, Any], truth: dict[str, Any]) -> bool:
-        return fuzz.token_sort_ratio(str(pred.get("field", "")), str(truth.get("field", ""))) >= 80
+        return bool(
+            fuzz.token_sort_ratio(str(pred.get("field", "")), str(truth.get("field", ""))) >= 80
+        )
 
     def _base_points(self, pred: dict[str, Any], truth: dict[str, Any]) -> float:
         severity_pred = str(pred.get("severity", "")).upper()
@@ -113,7 +115,7 @@ class ConsistencyGrader(AbstractGrader):
         return 0.0
 
     def _value_match(self, pred: dict[str, Any], truth: dict[str, Any]) -> bool:
-        return (
+        return bool(
             fuzz.token_sort_ratio(
                 str(pred.get("doc_a_value", "")),
                 str(truth.get("doc_a_value", "")),
@@ -160,7 +162,7 @@ class ConsistencyGrader(AbstractGrader):
             )
             >= 50
         )
-        return (section_protocol_match + section_icf_match + regulatory_basis_match) / 3
+        return float(section_protocol_match + section_icf_match + regulatory_basis_match) / 3
 
     def _compute_metrics(
         self, tp: float, pred_count: int, truth_count: int

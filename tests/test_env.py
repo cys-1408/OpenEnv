@@ -192,3 +192,171 @@ def test_step_after_done_returns_unsuccessful_action_result() -> None:
     assert done is True
     assert obs.last_action_result is not None
     assert obs.last_action_result.success is False
+
+
+def test_step_before_reset_raises_runtime_error() -> None:
+    env = PharmaTrialsEnv()
+    action = Action.model_validate(
+        {
+            "action_type": "QUERY",
+            "payload": {"doc_id": "icf_001", "question": "Protocol number?"},
+        }
+    )
+    with pytest.raises(RuntimeError, match="Environment not initialized"):
+        env.step(action)
+
+
+def test_private_require_task_spec_before_reset_raises() -> None:
+    env = PharmaTrialsEnv()
+    with pytest.raises(RuntimeError, match="Task spec not initialized"):
+        env._require_current_task_spec()
+
+
+def test_unknown_doc_paths_return_failed_action_result() -> None:
+    env = PharmaTrialsEnv()
+
+    extract = Action.model_validate(
+        {
+            "action_type": "EXTRACT",
+            "payload": {
+                "doc_id": "missing_doc",
+                "fields": ["protocol_number"],
+                "section_hint": None,
+            },
+        }
+    )
+    compare = Action.model_validate(
+        {
+            "action_type": "COMPARE",
+            "payload": {
+                "doc_id_a": "missing_a",
+                "doc_id_b": "missing_b",
+                "comparison_fields": ["dose_mg"],
+                "section_hint_a": None,
+                "section_hint_b": None,
+            },
+        }
+    )
+    summarise = Action.model_validate(
+        {
+            "action_type": "SUMMARISE",
+            "payload": {
+                "doc_id": "missing_doc",
+                "focus_areas": ["ae"],
+                "max_words": 30,
+            },
+        }
+    )
+    annotate = Action.model_validate(
+        {
+            "action_type": "ANNOTATE",
+            "payload": {
+                "doc_id": "missing_doc",
+                "section": "Study Design",
+                "label": "CHECK",
+                "note": "missing",
+                "severity": "INFO",
+            },
+        }
+    )
+    query = Action.model_validate(
+        {
+            "action_type": "QUERY",
+            "payload": {"doc_id": "missing_doc", "question": "Protocol number?"},
+        }
+    )
+
+    for action in [extract, compare, summarise, annotate, query]:
+        env.reset(task_id="HARD", seed=42)
+        obs, _reward, _done, _info = env.step(action)
+        assert obs.last_action_result is not None
+        assert obs.last_action_result.success is False
+        assert "Unknown doc_id" in (
+            obs.last_action_result.error_message or ""
+        ) or "Unknown compare document" in (obs.last_action_result.error_message or "")
+
+
+def test_compare_same_document_returns_no_inconsistencies() -> None:
+    env = PharmaTrialsEnv()
+    env.reset(task_id="MEDIUM", seed=42)
+    compare = Action.model_validate(
+        {
+            "action_type": "COMPARE",
+            "payload": {
+                "doc_id_a": "icf_001",
+                "doc_id_b": "icf_001",
+                "comparison_fields": ["num_visits", "dose_mg"],
+                "section_hint_a": None,
+                "section_hint_b": None,
+            },
+        }
+    )
+    obs, _reward, _done, _info = env.step(compare)
+    assert obs.last_action_result is not None
+    assert obs.last_action_result.success is True
+    assert obs.last_action_result.output.get("inconsistencies") == []
+
+
+def test_extract_unknown_field_keeps_empty_output() -> None:
+    env = PharmaTrialsEnv()
+    env.reset(task_id="EASY", seed=42)
+    action = Action.model_validate(
+        {
+            "action_type": "EXTRACT",
+            "payload": {
+                "doc_id": "icf_001",
+                "fields": ["not_a_real_field"],
+                "section_hint": None,
+            },
+        }
+    )
+    obs, _reward, _done, _info = env.step(action)
+    assert obs.last_action_result is not None
+    assert obs.last_action_result.success is True
+    extracted = obs.last_action_result.output.get("extracted_fields", {})
+    assert extracted == {}
+
+
+def test_extract_consumes_prior_query_records() -> None:
+    env = PharmaTrialsEnv()
+    env.reset(task_id="EASY", seed=42)
+    query = Action.model_validate(
+        {
+            "action_type": "QUERY",
+            "payload": {
+                "doc_id": "icf_001",
+                "question": "What is the protocol number?",
+            },
+        }
+    )
+    extract = Action.model_validate(
+        {
+            "action_type": "EXTRACT",
+            "payload": {
+                "doc_id": "icf_001",
+                "fields": ["protocol_number"],
+                "section_hint": None,
+            },
+        }
+    )
+    env.step(query)
+    assert env.state().query_history and env.state().query_history[0].consumed is False
+    env.step(extract)
+    assert env.state().query_history[0].consumed is True
+
+
+def test_action_doc_key_sorts_compare_ids() -> None:
+    env = PharmaTrialsEnv()
+    action = Action.model_validate(
+        {
+            "action_type": "COMPARE",
+            "payload": {
+                "doc_id_a": "z_doc",
+                "doc_id_b": "a_doc",
+                "comparison_fields": ["dose_mg"],
+                "section_hint_a": None,
+                "section_hint_b": None,
+            },
+        }
+    )
+    assert env._action_doc_key(action) == "a_doc|z_doc"

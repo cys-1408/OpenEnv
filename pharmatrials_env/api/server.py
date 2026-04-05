@@ -52,7 +52,7 @@ async def root() -> dict[str, str]:
         "version": "1.0.0",
         "health_check": "/health",
         "tasks": "/tasks",
-        "documentation": "/openenv.yaml"
+        "documentation": "/openenv.yaml",
     }
 
 

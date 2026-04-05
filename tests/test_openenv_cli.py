@@ -48,6 +48,52 @@ def test_validate_manifest_schema_rejects_bad_task_steps() -> None:
         cli._validate_manifest_schema(manifest)
 
 
+def test_load_manifest_rejects_non_mapping_root(tmp_path: Path) -> None:
+    path = tmp_path / "openenv.yaml"
+    path.write_text("- item\n- another\n", encoding="utf-8")
+    with pytest.raises(cli.ValidationError, match="mapping/object"):
+        cli._load_manifest(path)
+
+
+def test_check_required_keys_reports_missing_key() -> None:
+    manifest = _base_manifest()
+    assert isinstance(manifest, dict)
+    manifest.pop("api")
+    with pytest.raises(cli.ValidationError, match="Missing required manifest key: api"):
+        cli._check_required_keys(manifest)
+
+
+def test_check_name_version_rejects_bad_version() -> None:
+    manifest = _base_manifest()
+    manifest["version"] = "9.9.9"
+    with pytest.raises(cli.ValidationError, match="Manifest version"):
+        cli._check_name_version(manifest)
+
+
+def test_check_tasks_rejects_non_list() -> None:
+    with pytest.raises(cli.ValidationError, match="tasks must be a list"):
+        cli._check_tasks({"tasks": "not-a-list"})
+
+
+def test_check_task_entry_rejects_non_object() -> None:
+    with pytest.raises(cli.ValidationError, match="Each task must be an object"):
+        cli._check_task_entry("EASY")
+
+
+def test_check_api_endpoints_rejects_wrong_shape() -> None:
+    with pytest.raises(cli.ValidationError, match="api must be an object"):
+        cli._check_api_endpoints({"api": "nope"})
+    with pytest.raises(cli.ValidationError, match="api.endpoints must be an object"):
+        cli._check_api_endpoints({"api": {"endpoints": "nope"}})
+
+
+def test_check_docker_rejects_non_object_and_bad_port() -> None:
+    with pytest.raises(cli.ValidationError, match="docker must be an object"):
+        cli._check_docker({"docker": "nope"})
+    with pytest.raises(cli.ValidationError, match="docker.port"):
+        cli._check_docker({"docker": {"port": 1234}})
+
+
 class _Resp:
     def __init__(self, status_code: int) -> None:
         self.status_code = status_code
@@ -100,7 +146,9 @@ def test_validate_runtime_health_failure(monkeypatch: pytest.MonkeyPatch) -> Non
         cli._validate_runtime("http://localhost:7860")
 
 
-def test_run_validate_calls_runtime_when_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_validate_calls_runtime_when_base_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     called = {"runtime": False}
 
     def _fake_runtime(_base_url: str) -> list[str]:
@@ -113,11 +161,17 @@ def test_run_validate_calls_runtime_when_base_url(monkeypatch: pytest.MonkeyPatc
     assert result["runtime_checks"] == ["health"]
 
 
-def test_main_validate_success(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+def test_main_validate_success(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     monkeypatch.setattr(
         cli,
         "run_validate",
-        lambda **_kwargs: {"status": "passed", "schema_checks": [], "runtime_checks": []},
+        lambda **_kwargs: {
+            "status": "passed",
+            "schema_checks": [],
+            "runtime_checks": [],
+        },
     )
     monkeypatch.setattr(sys, "argv", ["openenv", "validate", "--config", "openenv.yaml"])
 
@@ -130,7 +184,9 @@ def test_main_validate_success(monkeypatch: pytest.MonkeyPatch, capsys: pytest.C
     assert parsed["status"] == "passed"
 
 
-def test_main_validate_failure(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+def test_main_validate_failure(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     def _boom(**_kwargs: object) -> dict[str, object]:
         raise cli.ValidationError("bad manifest")
 

@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from typing import Any, cast
+
+import pytest
+
+from pharmatrials_env.graders.base import AbstractGrader
 from pharmatrials_env.graders.consistency_grader import ConsistencyGrader
 from pharmatrials_env.graders.icf_grader import ICFExtractionGrader
 from pharmatrials_env.graders.reconciliation_grader import ReconciliationGrader
@@ -239,3 +244,78 @@ def test_reconciliation_grader_full_path_scoring() -> None:
     }
     out = grader.score(submission, gt)
     assert 0.8 <= out["score"] <= 1.0
+
+
+def test_abstract_grader_base_methods_raise_not_implemented() -> None:
+    # Call the concrete function bodies directly to cover the explicit raises.
+    method_generate = cast(Any, AbstractGrader.generate_ground_truth)
+    method_score = cast(Any, AbstractGrader.score)
+    with pytest.raises(NotImplementedError):
+        method_generate(object(), {}, {})
+    with pytest.raises(NotImplementedError):
+        method_score(object(), {}, {})
+
+
+def test_reconciliation_generate_ground_truth_default_fields() -> None:
+    grader = ReconciliationGrader()
+    gt = grader.generate_ground_truth({}, {})
+    assert gt == {
+        "sap_ae_analysis_summary": {},
+        "narrative_extractions": [],
+        "reconciliation_findings": [],
+    }
+
+
+def test_reconciliation_private_scoring_skip_and_match_paths() -> None:
+    grader = ReconciliationGrader()
+
+    assert grader._sap_score({}, {}) == 0.0
+
+    true_narratives = [
+        {
+            "narrative_id": "ae_001",
+            "ae_term_reported": "Headache",
+            "severity_grade_reported": 2,
+            "causality": "Related",
+            "onset_date": "2025-01-01",
+            "resolution_date": "2025-01-02",
+            "action_taken": "None",
+            "outcome": "Recovered",
+            "meets_sae_criteria": False,
+            "ae_term_coded_pt": "Headache",
+            "ae_term_coded_soc": "General disorders",
+        }
+    ]
+
+    # Unknown narrative_id should be skipped and score stays 0.
+    pred_narratives = [{"narrative_id": "ae_x"}]
+    assert grader._narrative_score(pred_narratives, true_narratives) == 0.0
+    assert grader._coding_score(pred_narratives, true_narratives) == 0.0
+
+    true_findings = [
+        {
+            "narrative_id": "ae_001",
+            "finding_type": "UNDETECTED_SAE",
+            "regulatory_impact": "HIGH",
+        },
+        {
+            "narrative_id": "ae_002",
+            "finding_type": "CTCAE_GRADE_INCONSISTENCY",
+            "regulatory_impact": "MEDIUM",
+        },
+    ]
+    pred_findings = [
+        {
+            "narrative_id": "ae_001",
+            "finding_type": "UNDETECTED_SAE",
+            "regulatory_impact": "HIGH",
+        },
+        {
+            "narrative_id": "ae_001",
+            "finding_type": "UNDETECTED_SAE",
+            "regulatory_impact": "HIGH",
+        },
+    ]
+    f1, impact = grader._findings_score(pred_findings, true_findings)
+    assert 0.0 < f1 < 1.0
+    assert impact == 0.5

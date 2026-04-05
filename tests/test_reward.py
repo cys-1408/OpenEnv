@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pharmatrials_env import PharmaTrialsEnv
 from pharmatrials_env.models import Action
+from pharmatrials_env.reward.reward_engine import RewardEngine
 
 
 def test_reward_total_in_range() -> None:
@@ -112,3 +113,37 @@ def test_repeated_action_penalty_same_doc_within_three_steps() -> None:
     _obs2, r2, _done2, _info2 = env.step(q2)
     assert r1.step_penalty == 0.0
     assert r2.step_penalty >= 0.03
+
+
+def test_reward_engine_static_helpers_cover_edge_paths() -> None:
+    env = PharmaTrialsEnv()
+    env.reset(task_id="EASY", seed=42)
+    state = env.state()
+
+    # Cover completeness wrapper and empty-required path.
+    assert 0.0 <= RewardEngine.completeness(state) <= 1.0
+    state.required_items = []
+    assert RewardEngine._completeness(state) == 0.0
+
+    # Cover keyword cap at 1.0.
+    reg = RewardEngine.regulatory_alignment_from_payload(
+        {"text": "ICH GCP MedDRA CTCAE IND EudraCT protocol"}
+    )
+    assert reg == 1.0
+
+    # Cover missing truth key path.
+    assert RewardEngine.extraction_accuracy({"missing": "x"}, {}) == 0.0
+
+    # Cover truth_f == 0 branch (both outcomes).
+    assert RewardEngine.extraction_accuracy({"dose_mg": "0"}, {"dose_mg": 0}) == 1.0
+    assert RewardEngine.extraction_accuracy({"dose_mg": "3"}, {"dose_mg": 0}) == 0.0
+
+    # Cover numeric conversion exception branch.
+    assert RewardEngine.extraction_accuracy({"dose_mg": "not-a-number"}, {"dose_mg": 10}) == 0.0
+
+    # Cover string fuzzy matching branch.
+    fuzzy = RewardEngine.extraction_accuracy(
+        {"study_title": "Open Trial Alpha"},
+        {"study_title": "Trial Open Alpha"},
+    )
+    assert fuzzy > 0.8

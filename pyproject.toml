@@ -58,3 +58,6 @@ ignore_missing_imports = true
 [tool.vulture]
 min_confidence = 80
 paths = ["pharmatrials_env"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -49,8 +49,8 @@ from openai import APIError, OpenAI, RateLimitError
 from pharmatrials_env import PharmaTrialsEnv
 from pharmatrials_env.models import Action, Observation
 
-
 # ── Environment variables ────────────────────────────────────────────────────
+
 
 def _load_env_file(path: str = ".env") -> None:
     env_path = Path(path)
@@ -85,7 +85,7 @@ SYSTEM_PROMPT = (
     "JSON Action object and no extra text.\n\n"
     "Available action types: EXTRACT, COMPARE, SUMMARISE, ANNOTATE, QUERY, SUBMIT.\n"
     "Use SUBMIT only when you have gathered enough data to answer the task objective.\n"
-    "Format: {\"action_type\": \"<TYPE>\", \"payload\": {...}}"
+    'Format: {"action_type": "<TYPE>", "payload": {...}}'
 )
 
 # ── Fallback hard-coded strategies (used when LLM unavailable) ───────────────
@@ -129,7 +129,10 @@ def fallback_action(task_id: str, obs: Observation, easy_cache: dict[str, Any]) 
         if not extracted:
             extracted = {"protocol_number": "", "dose_mg": 0, "num_visits": 0}
         return Action.model_validate(
-            {"action_type": "SUBMIT", "payload": {"answer": extracted, "confidence": 0.50}}
+            {
+                "action_type": "SUBMIT",
+                "payload": {"answer": extracted, "confidence": 0.50},
+            }
         )
 
     if task_id == "MEDIUM":
@@ -152,7 +155,10 @@ def fallback_action(task_id: str, obs: Observation, easy_cache: dict[str, Any]) 
         return Action.model_validate(
             {
                 "action_type": "SUBMIT",
-                "payload": {"answer": {"inconsistencies": inconsistencies}, "confidence": 0.45},
+                "payload": {
+                    "answer": {"inconsistencies": inconsistencies},
+                    "confidence": 0.45,
+                },
             }
         )
 
@@ -193,6 +199,7 @@ def fallback_action(task_id: str, obs: Observation, easy_cache: dict[str, Any]) 
 
 # ── Logging helpers (mandatory stdout format) ────────────────────────────────
 
+
 def log_start(task: str, env_name: str, model: str) -> None:
     print(f"[START] task={task} env={env_name} model={model}", flush=True)
 
@@ -207,8 +214,7 @@ def log_step(
     error_val = error if error else "null"
     done_val = str(done).lower()
     print(
-        f"[STEP] step={step} action={action} reward={reward:.2f} "
-        f"done={done_val} error={error_val}",
+        f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}",
         flush=True,
     )
 
@@ -224,6 +230,7 @@ def log_end(success: bool, steps: int, score: float, rewards: list[float]) -> No
 
 # ── Action label helper ──────────────────────────────────────────────────────
 
+
 def action_label(action: Any) -> str:
     action_type = str(
         getattr(
@@ -236,6 +243,7 @@ def action_label(action: Any) -> str:
 
 
 # ── LLM call ────────────────────────────────────────────────────────────────
+
 
 def call_model(observation_json: str) -> str:
     if not HF_TOKEN:
@@ -264,6 +272,7 @@ def call_model(observation_json: str) -> str:
 
 
 # ── Episode runner ───────────────────────────────────────────────────────────
+
 
 def run_episode(
     env: PharmaTrialsEnv,
@@ -328,6 +337,7 @@ def run_episode(
 
 
 # ── Entry point ──────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     env = PharmaTrialsEnv()
