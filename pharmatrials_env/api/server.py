@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, AsyncIterator, cast
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel
 
 from pharmatrials_env import PharmaTrialsEnv
@@ -57,9 +57,11 @@ async def root() -> dict[str, str]:
 
 
 @app.post("/reset", response_model=Observation)
-async def reset(body: ResetRequest) -> Observation:
+async def reset(body: ResetRequest | None = Body(default=None)) -> Observation:
     env = _require_env()
     async with _lock:
+        if body is None:
+            return env.reset()
         return env.reset(task_id=body.task_id, seed=body.seed)
 
 

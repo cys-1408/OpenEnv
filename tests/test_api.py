@@ -54,3 +54,19 @@ def test_openenv_manifest_endpoint() -> None:
         res = client.get("/openenv.yaml")
         assert res.status_code == 200
         assert "name: pharmatrials-env" in res.text
+
+
+def test_reset_without_body_is_accepted() -> None:
+    with TestClient(app) as client:
+        res = client.post("/reset")
+        assert res.status_code == 200
+        payload = res.json()
+        assert payload["task_id"] in {"EASY", "MEDIUM", "HARD"}
+
+
+def test_reset_with_null_body_is_accepted() -> None:
+    with TestClient(app) as client:
+        res = client.post("/reset", content="null", headers={"content-type": "application/json"})
+        assert res.status_code == 200
+        payload = res.json()
+        assert payload["task_id"] in {"EASY", "MEDIUM", "HARD"}
