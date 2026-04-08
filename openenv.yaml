@@ -20,6 +20,14 @@ tasks:
     description: Extract 12 structured fields from a single ICF document.
     difficulty: easy
     max_steps: 15
+    has_grader: true
+    grader:
+      type: python
+      implementation: pharmatrials_env.graders.icf_grader.ICFExtractionGrader
+      metric: field_accuracy
+    graders:
+      - type: python
+        implementation: pharmatrials_env.graders.icf_grader.ICFExtractionGrader
     reward_range: [0.0, 1.0]
     expected_score_gpt4o: 0.78
 
@@ -28,6 +36,14 @@ tasks:
     description: Identify and classify 5-8 deliberate inconsistencies between a Study Protocol and an ICF.
     difficulty: medium
     max_steps: 25
+    has_grader: true
+    grader:
+      type: python
+      implementation: pharmatrials_env.graders.consistency_grader.ConsistencyGrader
+      metric: inconsistency_f1
+    graders:
+      - type: python
+        implementation: pharmatrials_env.graders.consistency_grader.ConsistencyGrader
     reward_range: [0.0, 1.0]
     expected_score_gpt4o: 0.54
 
@@ -36,6 +52,14 @@ tasks:
     description: Reconcile AE narratives against SAP specifications, identifying coding errors and undetected SAEs.
     difficulty: hard
     max_steps: 40
+    has_grader: true
+    grader:
+      type: python
+      implementation: pharmatrials_env.graders.reconciliation_grader.ReconciliationGrader
+      metric: weighted_reconciliation_score
+    graders:
+      - type: python
+        implementation: pharmatrials_env.graders.reconciliation_grader.ReconciliationGrader
     reward_range: [0.0, 1.0]
     expected_score_gpt4o: 0.30
 

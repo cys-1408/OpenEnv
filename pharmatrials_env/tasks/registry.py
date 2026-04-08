@@ -52,6 +52,11 @@ class TaskRegistry:
                     "task_id": spec.task_id,
                     "task_name": spec.task_name,
                     "max_steps": spec.max_steps,
+                    "has_grader": True,
+                    "grader": {
+                        "name": spec.grader.__class__.__name__,
+                        "module": spec.grader.__class__.__module__,
+                    },
                     "allowed_actions": [
                         a.value for a in sorted(spec.allowed_actions, key=lambda x: x.value)
                     ],
