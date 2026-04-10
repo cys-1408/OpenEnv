@@ -38,6 +38,7 @@ class PharmaTrialsEnv:
     def reset(self, task_id: str | None = None, seed: int | None = None) -> Observation:
         task_spec = self._registry.get(task_id)
         resolved_seed = seed if seed is not None else int(uuid.uuid4().int % 100000)
+        task_summaries = self._registry.summaries()
 
         generator = DocumentGenerator(seed=resolved_seed, task_spec=task_spec)
         documents, metadata = generator.generate()
@@ -49,12 +50,15 @@ class PharmaTrialsEnv:
             seed=resolved_seed,
             step_number=0,
             max_steps=task_spec.max_steps,
+            tasks=task_summaries,
             documents=documents,
             done=False,
             episode_id=str(uuid.uuid4()),
             metadata={
                 "seed": resolved_seed,
                 "protocol_number": metadata.get("protocol_number"),
+                "available_tasks": task_summaries,
+                "available_task_count": len(task_summaries),
             },
             ground_truth=ground_truth,
             required_items=list(task_spec.required_output_items),
@@ -609,7 +613,12 @@ class PharmaTrialsEnv:
             task_instruction=instruction,
             partial_score=running,
             done=state.done,
-            metadata={"episode_id": state.episode_id, "seed": state.seed},
+            metadata={
+                "episode_id": state.episode_id,
+                "seed": state.seed,
+                "available_tasks": state.tasks,
+                "available_task_count": len(state.tasks),
+            },
         )
 
     def _info(self, reward: Reward) -> dict[str, Any]:

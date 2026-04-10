@@ -86,10 +86,26 @@ async def health() -> dict[str, str]:
 
 
 @app.get("/tasks")
-async def tasks() -> list[dict[str, object]]:
+async def tasks(flat: bool = False) -> dict[str, Any] | list[dict[str, object]]:
     env = _require_env()
     async with _lock:
-        return env.task_summaries()
+        rows = env.task_summaries()
+        if flat:
+            return rows
+        graded = 0
+        for row in rows:
+            has_single = bool(row.get("has_grader"))
+            has_plural = bool(row.get("has_graders"))
+            grader_enabled = bool((row.get("grader") or {}).get("enabled"))
+            graders = row.get("graders") or []
+            any_enabled = any(bool(g.get("enabled")) for g in graders if isinstance(g, dict))
+            if has_single or has_plural or grader_enabled or any_enabled:
+                graded += 1
+        return {
+            "tasks": rows,
+            "task_count": len(rows),
+            "graded_task_count": graded,
+        }
 
 
 @app.get("/openenv.yaml")

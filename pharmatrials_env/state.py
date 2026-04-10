@@ -50,6 +50,7 @@ class EnvState(BaseModel):
     seed: int = 0
     step_number: int = 0
     max_steps: int = 0
+    tasks: list[dict[str, Any]] = Field(default_factory=list)
     documents: dict[str, DocumentView] = Field(default_factory=dict)
     extraction_outputs: dict[str, dict[str, Any]] = Field(default_factory=dict)
     consistency_flags: list[ConsistencyFlag] = Field(default_factory=list)

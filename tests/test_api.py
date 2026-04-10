@@ -18,7 +18,20 @@ def test_tasks_endpoint() -> None:
         res = client.get("/tasks")
         assert res.status_code == 200
         data = res.json()
-        assert any(row["task_id"] == "EASY" for row in data)
+        assert "tasks" in data
+        rows = data["tasks"]
+        assert any(row["task_id"] == "EASY" for row in rows)
+        assert data["task_count"] >= 3
+        assert data["graded_task_count"] >= 3
+
+
+def test_tasks_endpoint_flat_mode() -> None:
+    with TestClient(app) as client:
+        res = client.get("/tasks?flat=true")
+        assert res.status_code == 200
+        rows = res.json()
+        assert isinstance(rows, list)
+        assert any(row["task_id"] == "EASY" for row in rows)
 
 
 def test_reset_step_state_endpoints() -> None:
