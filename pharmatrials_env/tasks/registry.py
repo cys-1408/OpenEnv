@@ -50,6 +50,16 @@ class TaskRegistry:
             "MEDIUM": "inconsistency_f1",
             "HARD": "weighted_reconciliation_score",
         }
+        task_difficulty = {
+            "EASY": "easy",
+            "MEDIUM": "medium",
+            "HARD": "hard",
+        }
+        task_descriptions = {
+            "EASY": "Extract 12 structured fields from a single ICF document.",
+            "MEDIUM": "Identify and classify inconsistencies between a Study Protocol and an ICF.",
+            "HARD": "Reconcile AE narratives against SAP specifications.",
+        }
         rows: list[dict[str, object]] = []
         for spec in self._specs.values():
             grader_name = spec.grader.__class__.__name__
@@ -62,6 +72,9 @@ class TaskRegistry:
                     "task_id": spec.task_id,
                     "name": spec.task_name,
                     "task_name": spec.task_name,
+                    "difficulty": task_difficulty.get(spec.task_id, "unknown"),
+                    "description": task_descriptions.get(spec.task_id, spec.task_name),
+                    "enabled": True,
                     "max_steps": spec.max_steps,
                     "has_grader": True,
                     "has_graders": True,

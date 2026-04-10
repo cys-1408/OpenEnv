@@ -19,6 +19,7 @@ tasks:
     task_id: EASY
     name: ICF Extraction
     task_name: ICF Extraction
+    enabled: true
     description: Extract 12 structured fields from a single ICF document.
     difficulty: easy
     max_steps: 15
@@ -42,6 +43,7 @@ tasks:
     task_id: MEDIUM
     name: Protocol-ICF Consistency Check
     task_name: Protocol-ICF Consistency Check
+    enabled: true
     description: Identify and classify 5-8 deliberate inconsistencies between a Study Protocol and an ICF.
     difficulty: medium
     max_steps: 25
@@ -65,6 +67,7 @@ tasks:
     task_id: HARD
     name: SAP-AE Narrative Reconciliation
     task_name: SAP-AE Narrative Reconciliation
+    enabled: true
     description: Reconcile AE narratives against SAP specifications, identifying coding errors and undetected SAEs.
     difficulty: hard
     max_steps: 40
