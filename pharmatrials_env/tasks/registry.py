@@ -45,11 +45,17 @@ class TaskRegistry:
         return self._specs[resolved]
 
     def summaries(self) -> list[dict[str, object]]:
+        grader_metrics = {
+            "EASY": "field_accuracy",
+            "MEDIUM": "inconsistency_f1",
+            "HARD": "weighted_reconciliation_score",
+        }
         rows: list[dict[str, object]] = []
         for spec in self._specs.values():
             grader_name = spec.grader.__class__.__name__
             grader_module = spec.grader.__class__.__module__
             grader_impl = f"{grader_module}.{grader_name}"
+            grader_metric = grader_metrics.get(spec.task_id, "score")
             rows.append(
                 {
                     "id": spec.task_id,
@@ -58,16 +64,24 @@ class TaskRegistry:
                     "task_name": spec.task_name,
                     "max_steps": spec.max_steps,
                     "has_grader": True,
+                    "has_graders": True,
+                    "grader_enabled": True,
                     "grader": {
+                        "type": "python",
                         "name": grader_name,
                         "module": grader_module,
                         "implementation": grader_impl,
+                        "metric": grader_metric,
+                        "enabled": True,
                     },
                     "graders": [
                         {
+                            "type": "python",
                             "name": grader_name,
                             "module": grader_module,
                             "implementation": grader_impl,
+                            "metric": grader_metric,
+                            "enabled": True,
                         }
                     ],
                     "allowed_actions": [
