@@ -47,16 +47,29 @@ class TaskRegistry:
     def summaries(self) -> list[dict[str, object]]:
         rows: list[dict[str, object]] = []
         for spec in self._specs.values():
+            grader_name = spec.grader.__class__.__name__
+            grader_module = spec.grader.__class__.__module__
+            grader_impl = f"{grader_module}.{grader_name}"
             rows.append(
                 {
+                    "id": spec.task_id,
                     "task_id": spec.task_id,
+                    "name": spec.task_name,
                     "task_name": spec.task_name,
                     "max_steps": spec.max_steps,
                     "has_grader": True,
                     "grader": {
-                        "name": spec.grader.__class__.__name__,
-                        "module": spec.grader.__class__.__module__,
+                        "name": grader_name,
+                        "module": grader_module,
+                        "implementation": grader_impl,
                     },
+                    "graders": [
+                        {
+                            "name": grader_name,
+                            "module": grader_module,
+                            "implementation": grader_impl,
+                        }
+                    ],
                     "allowed_actions": [
                         a.value for a in sorted(spec.allowed_actions, key=lambda x: x.value)
                     ],
