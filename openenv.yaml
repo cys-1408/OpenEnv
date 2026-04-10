@@ -16,50 +16,71 @@ tags:
 
 tasks:
   - id: EASY
+    task_id: EASY
     name: ICF Extraction
+    task_name: ICF Extraction
     description: Extract 12 structured fields from a single ICF document.
     difficulty: easy
     max_steps: 15
     has_grader: true
     grader:
       type: python
+      name: ICFExtractionGrader
       implementation: pharmatrials_env.graders.icf_grader.ICFExtractionGrader
       metric: field_accuracy
+      enabled: true
     graders:
       - type: python
+        name: ICFExtractionGrader
         implementation: pharmatrials_env.graders.icf_grader.ICFExtractionGrader
+        metric: field_accuracy
+        enabled: true
     reward_range: [0.0, 1.0]
     expected_score_gpt4o: 0.78
 
   - id: MEDIUM
+    task_id: MEDIUM
     name: Protocol-ICF Consistency Check
+    task_name: Protocol-ICF Consistency Check
     description: Identify and classify 5-8 deliberate inconsistencies between a Study Protocol and an ICF.
     difficulty: medium
     max_steps: 25
     has_grader: true
     grader:
       type: python
+      name: ConsistencyGrader
       implementation: pharmatrials_env.graders.consistency_grader.ConsistencyGrader
       metric: inconsistency_f1
+      enabled: true
     graders:
       - type: python
+        name: ConsistencyGrader
         implementation: pharmatrials_env.graders.consistency_grader.ConsistencyGrader
+        metric: inconsistency_f1
+        enabled: true
     reward_range: [0.0, 1.0]
     expected_score_gpt4o: 0.54
 
   - id: HARD
+    task_id: HARD
     name: SAP-AE Narrative Reconciliation
+    task_name: SAP-AE Narrative Reconciliation
     description: Reconcile AE narratives against SAP specifications, identifying coding errors and undetected SAEs.
     difficulty: hard
     max_steps: 40
     has_grader: true
     grader:
       type: python
+      name: ReconciliationGrader
       implementation: pharmatrials_env.graders.reconciliation_grader.ReconciliationGrader
       metric: weighted_reconciliation_score
+      enabled: true
     graders:
       - type: python
+        name: ReconciliationGrader
         implementation: pharmatrials_env.graders.reconciliation_grader.ReconciliationGrader
+        metric: weighted_reconciliation_score
+        enabled: true
     reward_range: [0.0, 1.0]
     expected_score_gpt4o: 0.30
 
